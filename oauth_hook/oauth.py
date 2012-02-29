@@ -138,8 +138,8 @@ class HmacSha1Signature(SignatureMethod):
         # build a Signature Base String, escaping '='
         signature_base_string = '&'.join(parameters).replace('=', '%3D')
 
-        encrypted = hmac.new(key, signature_base_string, sha1)
-        oauth_signature = base64.b64encode(encrypted.digest())[:-1]
+        hashed = hmac.new(key, signature_base_string, sha1)
+        oauth_signature = base64.b64encode(hashed.digest())[:-1]
         oauth_signature = self._escape(oauth_signature)
 
         # add the signature to the request params
