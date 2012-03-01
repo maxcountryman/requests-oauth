@@ -62,7 +62,7 @@ class SignatureMethod(object):
         '''
 
         if not type(request.params) == str and not type(request.data) == str:
-            # neither params nor data is a string, i.e. both are dicts
+            # if neither params nor data are a string, i.e. both are dicts
 
             # we concatenate the respective dicts
             data_and_params = \
@@ -73,7 +73,7 @@ class SignatureMethod(object):
                 normalized += [(k, v)]
         elif type(request.params) == str and type(request.data) == str:
             # if both params and data are strings
-            params = urlparse.urlparse.parse_qs(request.params)
+            params = urlparse.urlparse.parse_qsl(request.params)
             data = urlparse.parse_qsl(request.data)
             normalized = params + data
         elif type(request.params) == str:
@@ -91,25 +91,25 @@ class SignatureMethod(object):
             for k, v in request.params.items():
                 normalized += [(k, v)]
 
-        # extract values from our list of tuples and escape them
-        escaped_normalized = []
+        # extract values from our list of tuples and encode them as UTF-8
+        encoded_normalized = []
         for t in normalized:
             k, v = t
             k, v = self._to_utf8(k), self._to_utf8(v)
 
             # save escaped key/value pairs to the request and our list
             request.data_and_params[k] = v
-            escaped_normalized += [(k, v)]
+            encoded_normalized += [(k, v)]
 
         # stuff all the params from request.data_and_params in normalized
         for k, v in request.data_and_params.items():
-            escaped_normalized += [(k, v)]
+            encoded_normalized += [(k, v)]
 
         # sort the params as per the OAuth spec
-        escaped_normalized.sort()
+        encoded_normalized.sort()
 
         # finally encode the params as a string
-        escaped_normalized = urlencode(escaped_normalized)
+        escaped_normalized = urlencode(encoded_normalized)
         return escaped_normalized.replace('+', '%20').replace('%7E', '~')
 
 
